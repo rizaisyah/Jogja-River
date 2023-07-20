@@ -30,17 +30,21 @@ def plot_avg_concentration(filtered_data, parameter, year):
 def main():
     st.title('Concentration Dashboard')
 
-    # Filter unique values of 'Year'
+    # Filter unique values of 'Parameter' and 'Year'
+    unique_parameters = df['Parameter'].unique()
     unique_years = df['Tahun'].unique()
+
+    # Selectbox to choose the 'Parameter'
+    selected_parameter = st.selectbox('Select Parameter', unique_parameters)
 
     # Selectbox to choose the 'Year'
     selected_year = st.selectbox('Select Year', unique_years)
 
     # Filter the data based on selected 'Parameter' and 'Year'
-    filtered_data = filter_data(df, selected_year)
+    filtered_data = filter_data(df, selected_parameter, selected_year)
 
     # Display the plot for the filtered data
-    plot_avg_concentration(filtered_data, selected_year)
+    plot_avg_concentration(filtered_data, selected_parameter, selected_year)
 
 if __name__ == '__main__':
     main()
