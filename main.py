@@ -3,48 +3,52 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Membaca data dari file CSV
+# Load dataset from csv
 df = pd.read_csv("data.csv")
 
-def filter_data(df, parameter, year):
-    filtered_data = df[(df['Parameter'] == parameter) & (df['Tahun'] == year)]
+def filter_data(df, year, place):
+    filtered_data = df[(df['Tahun'] == year) & (df['Nama Lokasi'] == place)]
     return filtered_data
 
 # Function to plot average concentration for a given dataset
-def plot_avg_concentration(filtered_data, parameter, year):
-    # Calculate the average concentration for each month
-    avg_concentration_by_month = filtered_data.groupby('Bulan')['Konsentrasi'].mean().reset_index()
+def plot_avg_concentration(filter_data, year, place):
+    for parameter_value in filter_data['Parameter'].unique():
+        params = filter_data[filter_data['Parameter'] == parameter_value]
+        # Calculate the average concentration for each month
+        avg_concentration_by_month = params.groupby('Bulan')['Konsentrasi'].mean().reset_index()
 
-    # Create a plot using seaborn
-    plt.figure(figsize=(10, 6))
+        # Create a plot using seaborn
+        plt.figure(figsize=(10, 6))
 
-    sns.barplot(x='Bulan', y='Konsentrasi', data=avg_concentration_by_month)
-    plt.title(f'Average Concentration for Parameter: {parameter}, Year: {year}')
-    plt.xlabel('Month')
-    plt.ylabel('Average Concentration')
-    plt.xticks(rotation=45)
+        sns.barplot(x='Bulan', y='Konsentrasi', data=avg_concentration_by_month)
+        plt.title(f'Average Concentration for Parameter: {parameter_value}\n At {place} Year {year}\n')
+        plt.xlabel('Month')
+        plt.ylabel('Average Concentration')
+        plt.xticks(rotation=45)
 
-    st.pyplot(plt)  # Display the plot using Streamlit
+        # for i in range(len(avg_concentration_by_month)):
+        #     value = float(avg_concentration_by_month['Konsentrasi'][i])
+        #     plt.text(avg_concentration_by_month['Bulan'][i], value, str(value), ha='center')
+
+        st.pyplot(plt)  # Display the plot using Streamlit
 
 # Streamlit app
 def main():
-    st.title('Concentration Dashboard')
+    st.title('Concentration Distribution Dashboard by Parameter')
 
-    # Filter unique values of 'Parameter' and 'Year'
-    unique_parameters = df['Parameter'].unique()
+    # Filter unique values of 'Place' and 'Year'
     unique_years = df['Tahun'].unique()
-
-    # Selectbox to choose the 'Parameter'
-    selected_parameter = st.selectbox('Select Parameter', unique_parameters)
+    unique_place = df['Nama Lokasi'].unique()
 
     # Selectbox to choose the 'Year'
     selected_year = st.selectbox('Select Year', unique_years)
+    selected_place = st.selectbox('Select Place', unique_place)
 
-    # Filter the data based on selected 'Parameter' and 'Year'
-    filtered_data = filter_data(df, selected_parameter, selected_year)
+    # Filter the data based on selected 'Place' and 'Year'
+    filtered_data = filter_data(df, selected_year, selected_place)
 
     # Display the plot for the filtered data
-    plot_avg_concentration(filtered_data, selected_parameter, selected_year)
+    plot_avg_concentration(filtered_data, selected_year, selected_place)
 
 if __name__ == '__main__':
     main()
